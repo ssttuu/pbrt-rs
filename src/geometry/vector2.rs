@@ -26,7 +26,8 @@ use num::One;
 use crate::geometry::vector::Length;
 use crate::geometry::vector::Cross;
 use crate::geometry::vector::Dot;
-use crate::geometry::math::Sqrt;
+use crate::types::Number;
+use crate::types::to_float;
 
 pub struct ParseVectorError;
 
@@ -40,11 +41,6 @@ pub struct Vector2<T> {
     pub y: T,
 }
 
-pub trait Number: Num + Copy + ToPrimitive + PartialOrd + Sqrt +
-                  MulAssign + DivAssign + AddAssign + SubAssign +
-                  MulAssign<Float> {
-
-}
 
 impl<T> Vector2<T> where T: Number {
     pub fn new(x: T, y: T) -> Self {
@@ -54,37 +50,34 @@ impl<T> Vector2<T> where T: Number {
         }
     }
 
-    // TODO: I hate this method name and what it does. Fix it.
-    pub fn is_negative(&self) -> [bool; 2] {
-        let mut is_neg = [false, false];
-        if self.x < T::zero() {
-            is_neg[0] = true;
+    pub fn is_negative(&self) -> Vector2<bool> {
+        Vector2 {
+            x: self.x < T::zero(),
+            y: self.y < T::zero(),
         }
-        if self.y < T::zero() {
-            is_neg[1] = true;
-        }
-        is_neg
     }
 
-    pub fn normalize(&mut self) -> &mut Vector2<T> {
-        let len2 = self.length_squared();
-        if len2 > T::one() {
-            let inv = 1.0 / len2.sqrt();
-            self.x *= inv;
-            self.y *= inv;
-        }
+    pub fn normalize(v: Self) -> Vector2<Float> {
+        v.normalized()
+    }
 
-        self
+    pub fn normalized(&self) -> Vector2<Float> {
+        let mul = to_float(1.0) / self.length();
+
+        Vector2 {
+            x: self.x.to_float() * mul,
+            y: self.y.to_float() * mul,
+        }
     }
 }
 
-impl<T> Length<T> for Vector2<T> where T: Num + Copy + ToPrimitive + PartialOrd {
+impl<T> Length<T> for Vector2<T> where T: Number {
     fn length_squared(&self) -> T {
         self.x * self.x + self.y * self.y
     }
 
     fn length(&self) -> Float {
-        self.length_squared().to_f64().unwrap().sqrt()
+        to_float(self.length_squared()).sqrt()
     }
 }
 
@@ -136,7 +129,6 @@ impl<T: AddAssign + Copy> AddAssign<T> for Vector2<T> {
 //}
 
 impl<T> Div<T> for Vector2<T> where T: Num + ToPrimitive + Copy + Div<Output=T> + Mul<Output=T> {
-
     type Output = Self;
 
     fn div(self, rhs: T) -> Self {
@@ -419,6 +411,15 @@ mod test {
 
         v[0] = 3;
         assert_eq!(v[0], 3);
+    }
+
+    #[test]
+    fn is_negative() {
+        let v = Vector2::new(-1, 1);
+        let is_neg = v.is_negative();
+
+        assert_eq!(is_neg.x, true);
+        assert_eq!(is_neg.y, false);
     }
 
     #[test]

@@ -18,10 +18,6 @@ pub trait Length<T> where T: Num + Copy + ToPrimitive + PartialOrd {
     fn length(&self) -> f64;
 }
 
-//pub trait Vector:  Dot + Length {
-//
-//}
-
 pub fn dot<T, V>(a: T, b: T) -> V where T: Dot<V> + Copy, V: Num {
     a.dot(b)
 }
@@ -42,6 +38,3 @@ pub fn distance<T, V>(a: T, b: T) -> f64 where T: Sub<Output=T> + Length<V>, V: 
     (b - a).length()
 }
 
-//pub fn normalize<T, V, O>(a: T) -> O where T: Div<Output=T> + Length<V>, V: Num + Copy + ToPrimitive + PartialOrd {
-//    a / a.length()
-//}
