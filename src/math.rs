@@ -1,13 +1,12 @@
-use num::Num;
-use std::f64::NAN;
 use core::intrinsics;
-use num::ToPrimitive;
-use std::ops::MulAssign;
-use std::ops::DivAssign;
-use std::ops::AddAssign;
-use std::ops::SubAssign;
 use num::Float;
-
+use num::Num;
+use num::ToPrimitive;
+use std::f64::NAN;
+use std::ops::AddAssign;
+use std::ops::DivAssign;
+use std::ops::MulAssign;
+use std::ops::SubAssign;
 
 pub trait Sqrt {
     fn sqrt(self) -> f64;
@@ -24,7 +23,7 @@ macro_rules! sqrt_impl {
                 }
             }
         }
-    }
+    };
 }
 
 sqrt_impl!(u8, 0);

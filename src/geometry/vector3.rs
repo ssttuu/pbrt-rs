@@ -1,33 +1,34 @@
-use std::ops::Mul;
-use std::ops::MulAssign;
+use num;
+use num::Num;
+use std::ops::Add;
 use std::ops::AddAssign;
-use std::ops::Sub;
-use std::ops::SubAssign;
 use std::ops::Div;
 use std::ops::DivAssign;
-use std::ops::Add;
 use std::ops::Index;
 use std::ops::IndexMut;
-use num::Num;
-use num;
+use std::ops::Mul;
+use std::ops::MulAssign;
+use std::ops::Sub;
+use std::ops::SubAssign;
 
-use crate::types::{Int, Float};
 use crate::math;
+use crate::types::{Float, Int};
 
+use num::Integer;
+use num::NumCast;
+use num::One;
 use num::Signed;
 use num::ToPrimitive;
-use std::ops::Neg;
-use num::NumCast;
-use num::Integer;
 use num::Zero;
+use std::ops::Neg;
 use std::ops::Rem;
-use num::One;
 
-use crate::geometry::vector::Length;
 use crate::geometry::vector::Cross;
 use crate::geometry::vector::Dot;
-use crate::types::Number;
+use crate::geometry::vector::Length;
 use crate::types::to_float;
+use crate::types::Number;
+use std::ops::Deref;
 
 pub struct ParseVectorError;
 
@@ -35,21 +36,23 @@ pub struct ParseVectorError;
 //    x.to_f64().unwrap()
 //}
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Vector3<T> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
+impl<T> Vector3<T>
+where
+    T: Number,
+{
+    pub fn fill(v: T) -> Self {
+        Self { x: v, y: v, z: v }
+    }
 
-impl<T> Vector3<T> where T: Number {
     pub fn new(x: T, y: T, z: T) -> Self {
-        Vector3 {
-            x,
-            y,
-            z,
-        }
+        Vector3 { x, y, z }
     }
 
     pub fn is_negative(&self) -> Vector3<bool> {
@@ -75,7 +78,34 @@ impl<T> Vector3<T> where T: Number {
     }
 }
 
-impl<T> Length<T> for Vector3<T> where T: Number {
+impl<T> Cross for Vector3<T>
+where
+    T: Number,
+{
+    fn cross(&self, other: &Self) -> Self {
+        Self {
+            x: (self.y * other.z) - (self.z * other.y),
+            y: (self.z * other.x) - (self.x * other.z),
+            z: (self.x * other.y) - (self.y * other.x),
+        }
+    }
+}
+
+impl<T> Default for Vector3<T>
+where
+    T: Number,
+{
+    fn default() -> Self {
+        Self {
+            ..Default::default()
+        }
+    }
+}
+
+impl<T> Length<T> for Vector3<T>
+where
+    T: Number,
+{
     fn length_squared(&self) -> T {
         self.x * self.x + self.y * self.y
     }
@@ -85,7 +115,7 @@ impl<T> Length<T> for Vector3<T> where T: Number {
     }
 }
 
-impl<T: Add<Output=T>> Add for Vector3<T> {
+impl<T: Add<Output = T>> Add for Vector3<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -97,7 +127,7 @@ impl<T: Add<Output=T>> Add for Vector3<T> {
     }
 }
 
-impl<T: Add<Output=T> + Copy> Add<T> for Vector3<T> {
+impl<T: Add<Output = T> + Copy> Add<T> for Vector3<T> {
     type Output = Self;
 
     fn add(self, other: T) -> Self {
@@ -125,7 +155,10 @@ impl<T: AddAssign + Copy> AddAssign<T> for Vector3<T> {
     }
 }
 
-impl<T> Div<T> for Vector3<T> where T: Num + ToPrimitive + Copy + Div<Output=T> + Mul<Output=T> {
+impl<T> Div<T> for Vector3<T>
+where
+    T: Num + ToPrimitive + Copy + Div<Output = T> + Mul<Output = T>,
+{
     type Output = Self;
 
     fn div(self, rhs: T) -> Self {
@@ -138,7 +171,10 @@ impl<T> Div<T> for Vector3<T> where T: Num + ToPrimitive + Copy + Div<Output=T> 
     }
 }
 
-impl<T> Div for Vector3<T> where T: Div<Output=T> + Copy {
+impl<T> Div for Vector3<T>
+where
+    T: Div<Output = T> + Copy,
+{
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self {
@@ -158,12 +194,15 @@ impl<T: DivAssign + Copy> DivAssign<T> for Vector3<T> {
     }
 }
 
-impl<T> Dot<T> for Vector3<T> where T: Num + Copy + Signed {
-    fn dot(&self, other: Self) -> T {
+impl<T> Dot<T> for Vector3<T>
+where
+    T: Num + Copy + Signed,
+{
+    fn dot(&self, other: &Self) -> T {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    fn abs_dot(&self, other: Self) -> T {
+    fn abs_dot(&self, other: &Self) -> T {
         self.dot(other).abs()
     }
 }
@@ -192,7 +231,7 @@ impl<T> IndexMut<i32> for Vector3<T> {
     }
 }
 
-impl<T: Mul<Output=T> + Copy> Mul for Vector3<T> {
+impl<T: Mul<Output = T> + Copy> Mul for Vector3<T> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self {
@@ -204,7 +243,7 @@ impl<T: Mul<Output=T> + Copy> Mul for Vector3<T> {
     }
 }
 
-impl<T: Mul<Output=T> + Copy> Mul<T> for Vector3<T> {
+impl<T: Mul<Output = T> + Copy> Mul<T> for Vector3<T> {
     type Output = Self;
 
     fn mul(self, rhs: T) -> Self {
@@ -216,7 +255,7 @@ impl<T: Mul<Output=T> + Copy> Mul<T> for Vector3<T> {
     }
 }
 
-impl<T: Neg<Output=T> + Copy> Neg for Vector3<T> {
+impl<T: Neg<Output = T> + Copy> Neg for Vector3<T> {
     type Output = Self;
 
     fn neg(self) -> Self {
@@ -254,7 +293,7 @@ impl<T: MulAssign + Copy> MulAssign<T> for Vector3<T> {
     }
 }
 
-impl<T: Rem<Output=T> + Copy> Rem for Vector3<T> {
+impl<T: Rem<Output = T> + Copy> Rem for Vector3<T> {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
@@ -300,7 +339,7 @@ impl<T: Signed + Copy> Signed for Vector3<T> {
     }
 }
 
-impl<T: Sub<Output=T> + Copy> Sub<Self> for Vector3<T> {
+impl<T: Sub<Output = T> + Copy> Sub<Self> for Vector3<T> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self {
@@ -312,7 +351,7 @@ impl<T: Sub<Output=T> + Copy> Sub<Self> for Vector3<T> {
     }
 }
 
-impl<T: Sub<Output=T> + Copy> Sub<T> for Vector3<T> {
+impl<T: Sub<Output = T> + Copy> Sub<T> for Vector3<T> {
     type Output = Self;
 
     fn sub(self, rhs: T) -> Self {
@@ -345,4 +384,3 @@ impl<T: Zero + Copy> Zero for Vector3<T> {
         self.x.is_zero() && self.y.is_zero() && self.z.is_zero()
     }
 }
-

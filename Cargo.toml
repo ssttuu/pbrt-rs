@@ -1,5 +1,5 @@
 [package]
-name = "math"
+name = "pbrt"
 version = "0.1.0"
 authors = ["Stu Schwartz <stupschwartz@gmail.com>"]
 edition = "2018"
