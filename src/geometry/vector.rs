@@ -1,3 +1,4 @@
+use crate::types::Float;
 use crate::types::Number;
 use num::Num;
 use num::ToPrimitive;
@@ -10,23 +11,27 @@ pub trait Cross {
     fn cross(&self, other: &Self) -> Self;
 }
 
-pub trait Dot<T: Num> {
+pub trait Distance {
+    fn distance(&self, other: &Self) -> Float;
+}
+
+pub trait Dot<T: Number> {
     fn dot(&self, other: &Self) -> T;
     fn abs_dot(&self, other: &Self) -> T;
 }
 
 pub trait Length<T>
 where
-    T: Num + Copy + ToPrimitive + PartialOrd,
+    T: Number,
 {
     fn length_squared(&self) -> T;
-    fn length(&self) -> f64;
+    fn length(&self) -> Float;
 }
 
 pub fn dot<T, V>(a: &T, b: &T) -> V
 where
     T: Dot<V> + Copy,
-    V: Num,
+    V: Number,
 {
     a.dot(b)
 }
@@ -34,7 +39,7 @@ where
 pub fn abs_dot<T, V>(a: &T, b: &T) -> V
 where
     T: Dot<V> + Copy,
-    V: Num,
+    V: Number,
 {
     a.abs_dot(b)
 }
@@ -49,17 +54,16 @@ where
 pub fn distance_squared<T, V>(a: T, b: T) -> V
 where
     T: Sub<Output = T> + Length<V>,
-    V: Num + Copy + ToPrimitive + PartialOrd,
+    V: Number,
 {
     (b - a).length_squared()
 }
 
-pub fn distance<T, V>(a: T, b: T) -> f64
+pub fn distance<V>(a: V, b: V) -> Float
 where
-    T: Sub<Output = T> + Length<V>,
-    V: Num + Copy + ToPrimitive + PartialOrd,
+    V: Distance,
 {
-    (b - a).length()
+    a.distance(&b)
 }
 
 pub fn face_forward<T, V>(a: T, b: T) -> T

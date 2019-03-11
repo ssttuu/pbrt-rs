@@ -1,4 +1,5 @@
 #![feature(core_intrinsics)]
+#![feature(const_fn)]
 
 use crate::geometry::Vector2;
 use crate::geometry::Vector3;
@@ -18,6 +19,7 @@ pub mod materials;
 pub mod math;
 pub mod medium;
 pub mod primitive;
+pub mod quaternion;
 pub mod ray;
 pub mod reflection;
 pub mod sampler;
@@ -49,5 +51,3 @@ pub type Normal3i = Vector3i;
 pub type Normal3f = Vector3f;
 
 static SHADOW_EPSILON: Float = 0.0001;
-
-const INFINITY: Float = f64::INFINITY;

@@ -3,6 +3,7 @@ use crate::Normal3f;
 use crate::Vector3f;
 use std::rc::Rc;
 
+#[derive(Clone)]
 pub struct BSDF {
     pub eta: Float,
     pub ns: Normal3f,

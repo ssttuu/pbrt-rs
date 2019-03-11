@@ -1,5 +1,6 @@
 extern crate pbrt;
 
+use pbrt::materials::matte::MatteMaterial;
 use pbrt::primitive::GeometricPrimitive;
 use pbrt::primitive::Primitive;
 use pbrt::spectrum::Spectrum;
@@ -35,7 +36,14 @@ fn test_render() {
             });
             kd = ConstantTexture::new(color);
             sigma = ConstantTexture::new(0.0);
-            geoPrim = GeometricPrimitive::new(sphere, MatteMaterial::new(kd, sigma, nil));
+            geoPrim = GeometricPrimitive::new(
+                sphere,
+                Box::new(MatteMaterial {
+                    kd,
+                    sigma,
+                    bump_map: None,
+                }),
+            );
             xformPrim =
                 TransformedPrimitive::new(geoPrim, AnimatedTransform::new(xform, xform, 0, 1));
             primitives.push(xformPrim);

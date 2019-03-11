@@ -32,7 +32,7 @@ impl MediumInterface {
 
     pub fn is_medium_transition(&self) -> bool {
         match (&self.inside, &self.outside) {
-            (Some(m1), Some(m2)) => Rc::ptr_eq(m1, m2),
+            (Some(m1), Some(m2)) => !Rc::ptr_eq(m1, m2),
             _ => false,
         }
     }

@@ -1,5 +1,7 @@
 use crate::math::Sqrt;
 use num;
+use num::Signed;
+use std::cmp;
 use std::ops;
 
 pub type Int = i64;
@@ -41,6 +43,7 @@ pub trait Number:
     + ops::Neg
     + ops::SubAssign
     + PartialOrd
+    + Signed
     + Sqrt
     + ToFloat
 {

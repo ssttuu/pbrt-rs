@@ -35,7 +35,7 @@ pub struct ParseVectorError;
 //    x.to_f64().unwrap()
 //}
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct Vector2<T> {
     pub x: T,
     pub y: T,
@@ -168,7 +168,7 @@ impl<T: DivAssign + Copy> DivAssign<T> for Vector2<T> {
 
 impl<T> Dot<T> for Vector2<T>
 where
-    T: Num + Copy + Signed,
+    T: Number,
 {
     fn dot(&self, other: &Self) -> T {
         self.x * other.x + self.y * other.y

@@ -15,9 +15,10 @@ use crate::Normal3f;
 use crate::Point2f;
 use crate::Point3f;
 use crate::Vector3f;
-use crate::INFINITY;
 use crate::SHADOW_EPSILON;
 
+use crate::math;
+use crate::math::consts;
 use num::Zero;
 use std::rc::Rc;
 
@@ -56,7 +57,7 @@ pub trait Interaction<'prim> {
         Ray::new(
             origin,
             direction,
-            INFINITY,
+            consts::INFINITY,
             self.get_time(),
             //            self.get_medium(direction),
         )
@@ -86,6 +87,7 @@ pub trait Interaction<'prim> {
     }
 }
 
+#[derive(Clone)]
 pub struct Shading {
     pub dpdu: Vector3f,
     pub dpdv: Vector3f,
@@ -94,6 +96,7 @@ pub struct Shading {
     pub normal: Normal3f,
 }
 
+#[derive(Clone)]
 pub struct SurfaceInteraction<'prim> {
     pub point: Point3f,
     pub point_error: Vector3f,

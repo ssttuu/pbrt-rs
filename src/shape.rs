@@ -1,5 +1,4 @@
 use crate::bounds::Bounds3;
-use crate::bounds::Bounds3f;
 use crate::interaction::Interaction;
 use crate::interaction::SurfaceInteraction;
 use crate::ray::Ray;
@@ -22,7 +21,7 @@ pub trait Shape: Area {
         test_alpha_texture: bool,
     ) -> bool;
     fn intersect_p(&self, ray: &Ray, test_alpha_texture: bool) -> bool;
-    fn object_bound(&self) -> Bounds3f;
+    fn object_bound(&self) -> Bounds3;
     fn pdf(&self, int: &Interaction) -> Float;
     fn pdf_wi(&self, int: &Interaction, wi: &mut Vector3f) -> Float;
     fn reverse_orientation(&self) -> bool;
@@ -35,5 +34,5 @@ pub trait Shape: Area {
     ) -> Box<Interaction>;
     fn solid_angle(&self, p: &Point3f, n_samples: Int) -> Float;
     fn transform_swaps_handedness(&self) -> bool;
-    fn world_bound(&self) -> Bounds3f;
+    fn world_bound(&self) -> Bounds3;
 }

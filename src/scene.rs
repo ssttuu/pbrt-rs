@@ -1,4 +1,4 @@
-use crate::bounds::Bounds3f;
+use crate::bounds::Bounds3;
 use crate::interaction::Interaction;
 use crate::interaction::SurfaceInteraction;
 use crate::intersect::Intersect;
@@ -15,7 +15,7 @@ pub struct Scene {
     pub infinite_lights: Vec<Rc<Light>>,
 
     pub aggregate: Rc<Primitive>,
-    pub world_bound: Bounds3f,
+    pub world_bound: Bounds3,
 }
 
 impl Scene {

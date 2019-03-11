@@ -24,10 +24,12 @@ use std::ops::Neg;
 use std::ops::Rem;
 
 use crate::geometry::vector::Cross;
+use crate::geometry::vector::Distance;
 use crate::geometry::vector::Dot;
 use crate::geometry::vector::Length;
 use crate::types::to_float;
 use crate::types::Number;
+use std::cmp;
 use std::ops::Deref;
 
 pub struct ParseVectorError;
@@ -36,7 +38,7 @@ pub struct ParseVectorError;
 //    x.to_f64().unwrap()
 //}
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct Vector3<T> {
     pub x: T,
     pub y: T,
@@ -76,6 +78,22 @@ where
             z: self.z.to_float() * mul,
         }
     }
+
+    pub fn max(v1: &Self, v2: &Self) -> Self {
+        Self {
+            x: math::max(v1.x, v2.x),
+            y: math::max(v1.y, v2.y),
+            z: math::max(v1.z, v2.z),
+        }
+    }
+
+    pub fn min(v1: &Self, v2: &Self) -> Self {
+        Self {
+            x: math::min(v1.x, v2.x),
+            y: math::min(v1.y, v2.y),
+            z: math::min(v1.z, v2.z),
+        }
+    }
 }
 
 impl<T> Cross for Vector3<T>
@@ -87,17 +105,6 @@ where
             x: (self.y * other.z) - (self.z * other.y),
             y: (self.z * other.x) - (self.x * other.z),
             z: (self.x * other.y) - (self.y * other.x),
-        }
-    }
-}
-
-impl<T> Default for Vector3<T>
-where
-    T: Number,
-{
-    fn default() -> Self {
-        Self {
-            ..Default::default()
         }
     }
 }
@@ -115,11 +122,13 @@ where
     }
 }
 
-impl<T: Add<Output = T>> Add for Vector3<T> {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self {
-        Self {
+impl<T> Add for Vector3<T>
+where
+    T: Number,
+{
+    type Output = Vector3<T>;
+    fn add(self, other: Self) -> Self::Output {
+        Self::Output {
             x: self.x + other.x,
             y: self.y + other.y,
             z: self.z + other.z,
@@ -127,7 +136,24 @@ impl<T: Add<Output = T>> Add for Vector3<T> {
     }
 }
 
-impl<T: Add<Output = T> + Copy> Add<T> for Vector3<T> {
+impl<T> Add for &Vector3<T>
+where
+    T: Number,
+{
+    type Output = Vector3<T>;
+    fn add(self, other: Self) -> Self::Output {
+        Self::Output {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+
+impl<T> Add<T> for Vector3<T>
+where
+    T: Number,
+{
     type Output = Self;
 
     fn add(self, other: T) -> Self {
@@ -139,7 +165,10 @@ impl<T: Add<Output = T> + Copy> Add<T> for Vector3<T> {
     }
 }
 
-impl<T: AddAssign + Copy> AddAssign<Self> for Vector3<T> {
+impl<T> AddAssign for Vector3<T>
+where
+    T: Number,
+{
     fn add_assign(&mut self, other: Self) {
         self.x += other.x;
         self.y += other.y;
@@ -147,7 +176,10 @@ impl<T: AddAssign + Copy> AddAssign<Self> for Vector3<T> {
     }
 }
 
-impl<T: AddAssign + Copy> AddAssign<T> for Vector3<T> {
+impl<T> AddAssign<T> for Vector3<T>
+where
+    T: Number,
+{
     fn add_assign(&mut self, other: T) {
         self.x += other;
         self.y += other;
@@ -155,25 +187,33 @@ impl<T: AddAssign + Copy> AddAssign<T> for Vector3<T> {
     }
 }
 
+impl<T> Distance for Vector3<T>
+where
+    T: Number,
+{
+    fn distance(&self, other: &Self) -> Float {
+        (self - other).length()
+    }
+}
+
 impl<T> Div<T> for Vector3<T>
 where
-    T: Num + ToPrimitive + Copy + Div<Output = T> + Mul<Output = T>,
+    T: Number + From<Float>,
 {
-    type Output = Self;
+    type Output = Vector3<T>;
 
-    fn div(self, rhs: T) -> Self {
-        let inv = (T::one() / rhs) as T;
+    fn div(self, rhs: T) -> Self::Output {
         Self {
-            x: self.x * inv,
-            y: self.y * inv,
-            z: self.z * inv,
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
         }
     }
 }
 
 impl<T> Div for Vector3<T>
 where
-    T: Div<Output = T> + Copy,
+    T: Number,
 {
     type Output = Self;
 
@@ -186,7 +226,10 @@ where
     }
 }
 
-impl<T: DivAssign + Copy> DivAssign<T> for Vector3<T> {
+impl<T> DivAssign<T> for Vector3<T>
+where
+    T: Number,
+{
     fn div_assign(&mut self, other: T) {
         self.x /= other;
         self.y /= other;
@@ -196,7 +239,7 @@ impl<T: DivAssign + Copy> DivAssign<T> for Vector3<T> {
 
 impl<T> Dot<T> for Vector3<T>
 where
-    T: Num + Copy + Signed,
+    T: Number,
 {
     fn dot(&self, other: &Self) -> T {
         self.x * other.x + self.y * other.y + self.z * other.z
@@ -231,7 +274,10 @@ impl<T> IndexMut<i32> for Vector3<T> {
     }
 }
 
-impl<T: Mul<Output = T> + Copy> Mul for Vector3<T> {
+impl<T> Mul for Vector3<T>
+where
+    T: Number,
+{
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self {
@@ -243,7 +289,25 @@ impl<T: Mul<Output = T> + Copy> Mul for Vector3<T> {
     }
 }
 
-impl<T: Mul<Output = T> + Copy> Mul<T> for Vector3<T> {
+//impl<T> Mul<T> for Vector3<T>
+//where
+//    T: Number,
+//{
+//    type Output = Self;
+//
+//    fn mul(self, rhs: T) -> Self {
+//        Self {
+//            x: self.x * rhs,
+//            y: self.y * rhs,
+//            z: self.z * rhs,
+//        }
+//    }
+//}
+
+impl<T> Mul<T> for Vector3<T>
+where
+    T: Number,
+{
     type Output = Self;
 
     fn mul(self, rhs: T) -> Self {
@@ -255,7 +319,10 @@ impl<T: Mul<Output = T> + Copy> Mul<T> for Vector3<T> {
     }
 }
 
-impl<T: Neg<Output = T> + Copy> Neg for Vector3<T> {
+impl<T> Neg for Vector3<T>
+where
+    T: Number,
+{
     type Output = Self;
 
     fn neg(self) -> Self {
@@ -267,7 +334,10 @@ impl<T: Neg<Output = T> + Copy> Neg for Vector3<T> {
     }
 }
 
-impl<T: Num + Copy> Num for Vector3<T> {
+impl<T> Num for Vector3<T>
+where
+    T: Number,
+{
     type FromStrRadixErr = ParseVectorError;
 
     fn from_str_radix(str: &str, radix: u32) -> Result<Self, ParseVectorError> {
@@ -275,7 +345,10 @@ impl<T: Num + Copy> Num for Vector3<T> {
     }
 }
 
-impl<T: One + Copy> One for Vector3<T> {
+impl<T> One for Vector3<T>
+where
+    T: Number,
+{
     fn one() -> Self {
         Self {
             x: T::one(),
@@ -285,7 +358,10 @@ impl<T: One + Copy> One for Vector3<T> {
     }
 }
 
-impl<T: MulAssign + Copy> MulAssign<T> for Vector3<T> {
+impl<T> MulAssign<T> for Vector3<T>
+where
+    T: Number,
+{
     fn mul_assign(&mut self, rhs: T) {
         self.x *= rhs;
         self.y *= rhs;
@@ -293,7 +369,10 @@ impl<T: MulAssign + Copy> MulAssign<T> for Vector3<T> {
     }
 }
 
-impl<T: Rem<Output = T> + Copy> Rem for Vector3<T> {
+impl<T> Rem for Vector3<T>
+where
+    T: Number,
+{
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
@@ -305,7 +384,10 @@ impl<T: Rem<Output = T> + Copy> Rem for Vector3<T> {
     }
 }
 
-impl<T: Signed + Copy> Signed for Vector3<T> {
+impl<T> Signed for Vector3<T>
+where
+    T: Number,
+{
     fn abs(&self) -> Self {
         Self {
             x: self.x.abs(),
@@ -339,11 +421,13 @@ impl<T: Signed + Copy> Signed for Vector3<T> {
     }
 }
 
-impl<T: Sub<Output = T> + Copy> Sub<Self> for Vector3<T> {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self {
-        Self {
+impl<T> Sub for &Vector3<T>
+where
+    T: Number,
+{
+    type Output = Vector3<T>;
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self::Output {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
             z: self.z - rhs.z,
@@ -351,7 +435,24 @@ impl<T: Sub<Output = T> + Copy> Sub<Self> for Vector3<T> {
     }
 }
 
-impl<T: Sub<Output = T> + Copy> Sub<T> for Vector3<T> {
+impl<T> Sub for Vector3<T>
+where
+    T: Number,
+{
+    type Output = Vector3<T>;
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self::Output {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl<T> Sub<T> for Vector3<T>
+where
+    T: Number,
+{
     type Output = Self;
 
     fn sub(self, rhs: T) -> Self {
@@ -363,7 +464,10 @@ impl<T: Sub<Output = T> + Copy> Sub<T> for Vector3<T> {
     }
 }
 
-impl<T: SubAssign + Copy> SubAssign<T> for Vector3<T> {
+impl<T> SubAssign<T> for Vector3<T>
+where
+    T: Number,
+{
     fn sub_assign(&mut self, rhs: T) {
         self.x -= rhs;
         self.y -= rhs;
@@ -371,7 +475,10 @@ impl<T: SubAssign + Copy> SubAssign<T> for Vector3<T> {
     }
 }
 
-impl<T: Zero + Copy> Zero for Vector3<T> {
+impl<T> Zero for Vector3<T>
+where
+    T: Number,
+{
     fn zero() -> Self {
         Self {
             x: T::zero(),
