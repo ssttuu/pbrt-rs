@@ -319,6 +319,21 @@ where
     }
 }
 
+impl<T> Mul<T> for &Vector3<T>
+    where
+        T: Number,
+{
+    type Output = Vector3<T>;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        Self::Output {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
+    }
+}
+
 impl<T> Neg for Vector3<T>
 where
     T: Number,
@@ -327,6 +342,21 @@ where
 
     fn neg(self) -> Self {
         Self {
+            x: self.x.neg(),
+            y: self.y.neg(),
+            z: self.z.neg(),
+        }
+    }
+}
+
+impl<T> Neg for &Vector3<T>
+where
+    T: Number,
+{
+    type Output = Vector3<T>;
+
+    fn neg(self) -> Self::Output {
+        Self::Output {
             x: self.x.neg(),
             y: self.y.neg(),
             z: self.z.neg(),

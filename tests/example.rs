@@ -8,6 +8,9 @@ use pbrt::texture::constant::ConstantTexture;
 use pbrt::transform;
 use pbrt::types::Float;
 use pbrt::Vector3f;
+use pbrt::primitive::TransformedPrimitive;
+use pbrt::transform::AnimatedTransform;
+use pbrt::sphere::Sphere;
 
 #[test]
 fn test_render() {
@@ -21,22 +24,33 @@ fn test_render() {
     for k in 0..n {
         for i in 0..3 {
             let (mut x, mut y, mut z) = (0, 0, 0);
-            let color: Spectrum;
+            let mut color = Spectrum::default();
             match i {
                 0 => {
                     x = k / n * 100;
-                    color = Spectrum::new(1.0);
-                }
+                    color = Spectrum { data: vec![1., 0., 0.] };
+                },
+                1 => {
+                    y = k / n * 100;
+                    color = Spectrum { data: vec![0., 1., 0.] };
+                },
+                2 => {
+                    z = k / n * 100;
+                    color = Spectrum { data: vec![0., 0., 1.] };
+                },
+                _ => {}
             }
 
-            xform = transform::translate(Vector3f {
+            let sphere = Box::new(Sphere::new());
+
+            let xform = transform::translate(&Vector3f {
                 x: x as Float,
                 y: y as Float,
                 z: z as Float,
             });
-            kd = ConstantTexture::new(color);
-            sigma = ConstantTexture::new(0.0);
-            geoPrim = GeometricPrimitive::new(
+            let kd = ConstantTexture::new(color);
+            let sigma = ConstantTexture::new(0.0);
+            let geo_prim = GeometricPrimitive::new(
                 sphere,
                 Box::new(MatteMaterial {
                     kd,
@@ -44,9 +58,9 @@ fn test_render() {
                     bump_map: None,
                 }),
             );
-            xformPrim =
-                TransformedPrimitive::new(geoPrim, AnimatedTransform::new(xform, xform, 0, 1));
-            primitives.push(xformPrim);
+            let xform_prim =
+                TransformedPrimitive::new(geo_prim, AnimatedTransform::new(xform, xform, 0., 1.));
+            primitives.push(xform_prim);
         }
     }
 }

@@ -125,7 +125,36 @@ pub struct SurfaceInteraction<'prim> {
     pub face_index: Option<usize>,
 }
 
-impl<'ray> SurfaceInteraction<'ray> {
+impl<'prim> SurfaceInteraction<'prim> {
+    pub fn new(
+        point: Point3f,
+        point_error: Vector3f,
+        uv: Point2f,
+        wo: Vector3f,
+        dpdu: Vector3f,
+        dpdv: Vector3f,
+        dndu: Normal3f,
+        dndv: Normal3f,
+        time: Float,
+        shape: &'prim Shape,
+        face_index: Option<usize>,
+    ) -> Self {
+        Self {
+            point,
+            point_error,
+            uv,
+            wo,
+            dpdu,
+            dpdv,
+            dndu,
+            dndv,
+            time,
+            shape: Some(shape),
+            face_index,
+            .. Self::default()
+        }
+    }
+
     pub fn set_shading_geometry(
         &mut self,
         dpdu: Vector3f,
@@ -154,7 +183,7 @@ impl<'ray> SurfaceInteraction<'ray> {
     }
 }
 
-impl<'ray> Default for SurfaceInteraction<'ray> {
+impl<'prim> Default for SurfaceInteraction<'prim> {
     fn default() -> Self {
         Self {
             ..Default::default()

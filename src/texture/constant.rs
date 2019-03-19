@@ -1,13 +1,13 @@
 use crate::interaction::SurfaceInteraction;
 use crate::texture::Texture;
 
-pub struct ConstantTexture<T: Copy> {
+pub struct ConstantTexture<T: Clone> {
     value: T,
 }
 
 impl<T> ConstantTexture<T>
 where
-    T: Copy,
+    T: Clone,
 {
     pub fn new(v: T) -> Self {
         Self { value: v }
@@ -16,9 +16,9 @@ where
 
 impl<T> Texture<T> for ConstantTexture<T>
 where
-    T: Copy,
+    T: Clone,
 {
     fn evaluate(&self, si: &SurfaceInteraction) -> T {
-        self.value
+        self.value.clone()
     }
 }

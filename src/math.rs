@@ -4,6 +4,8 @@ use crate::types::Number;
 use core::intrinsics;
 use num::Num;
 use num::ToPrimitive;
+use crate::efloat::EFloat;
+use std::f64;
 
 pub mod consts {
     use super::next_float_up;
@@ -76,6 +78,13 @@ pub fn gamma(n: Float) -> Float {
     (n * consts::EPSILON) / (1.0 - n * consts::EPSILON)
 }
 
+pub fn is_inf(v: Float) -> bool {
+    match v {
+        f64::INFINITY => true,
+        _ => false,
+    }
+}
+
 pub fn lerp<T: Number>(t: T, v1: T, v2: T) -> T {
     (T::one() - t) * v1 + t * v2
 }
@@ -96,17 +105,26 @@ pub fn min<T: Number>(v1: T, v2: T) -> T {
     }
 }
 
-pub fn next_float_up(v: &Float) -> Float {
+pub fn next_float_up(v: Float) -> Float {
     Float::from_bits(v.to_bits() + 1)
 }
 
-pub fn next_float_down(v: &Float) -> Float {
+pub fn next_float_down(v: Float) -> Float {
     Float::from_bits(v.to_bits() - 1)
 }
 
 pub fn radians(degrees: Float) -> Float {
     consts::PI / 180.0 * degrees
 }
+
+//pub fn quadratic(a: Float, b: Float, c: Float) -> Option<(EFloat, EFloat)> {
+//    let discriminant = b * b - 4. * a * c;
+//    if discriminant < 0. {
+//        return None;
+//    }
+//    let root_discriminant = discriminant.sqrt();
+//    let float_root_discriminant =
+//}
 
 pub fn sin(v: Float) -> Float {
     v.sin()
@@ -151,3 +169,7 @@ sqrt_impl!(isize, 0);
 
 sqrt_impl!(f32, 0.0);
 sqrt_impl!(f64, 0.0);
+
+pub fn sqrt<T>(v: T) -> f64 where T: Sqrt {
+    v.sqrt()
+}

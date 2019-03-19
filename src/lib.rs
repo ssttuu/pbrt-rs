@@ -10,6 +10,7 @@ use std::f64;
 
 pub mod bounds;
 pub mod bssrdf;
+pub mod efloat;
 pub mod geometry;
 pub mod interaction;
 pub mod intersect;
@@ -23,8 +24,10 @@ pub mod quaternion;
 pub mod ray;
 pub mod reflection;
 pub mod sampler;
+pub mod sampling;
 pub mod scene;
 pub mod shape;
+pub mod sphere;
 pub mod spectrum;
 pub mod texture;
 pub mod transform;

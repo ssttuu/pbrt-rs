@@ -12,7 +12,7 @@ pub enum SpectrumType {
 
 pub static DEFAULT_SPECTRUM_TYPE: SpectrumType = SpectrumType::Sampled;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct Spectrum {
     data: Vec<Float>,
 }
